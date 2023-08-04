@@ -17,10 +17,10 @@ The rules are:
 - Is the connection to the business problem convincing "at face value"?
 - Are no intermediate steps missing?
   
-Please write the code in rust.
+Please write the code in python.
 ```
 
-Please write me a main.rs file that can do the following:
+Please write me a main.py file that can do the following:
 
 ## Configuration
 
