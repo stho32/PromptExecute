@@ -5,7 +5,7 @@ import ast
 FILE_MSG = "{} contains the following elements:\n"
 FUNC_MSG = "def {}({})\n"
 
-def extract_function_interfaces(python_file_content, python_file_name):
+def extract_functions(python_file_content, python_file_name):
     # Parse the python file content into an abstract syntax tree
     ast_tree = ast.parse(python_file_content)
 
