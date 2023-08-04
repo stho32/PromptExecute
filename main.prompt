@@ -12,6 +12,9 @@ Please write me a main.py file that can do the following:
 
 ## General functionality
 
+I will talk a lot about filenames in the following. I want to make an example to clarify the usage I mean:
+For a file with the name `main.prompt`, the other related files are named `main.prompt.completed`, `main.prompt.checksum` and `main.prompt.output`.
+
 - It should walk through a directory structure recursivly, looking for .prompt files.
 
 - Change detection:
@@ -26,9 +29,13 @@ Please write me a main.py file that can do the following:
 - How processing of a file is done:
   - The .prompt file is read into a list of strings.
   - Then go through all the lines in the file.
-    - If the line starts with `#include`, the rest of the line is a relative path pointing to another file whose content should be included in the preparedPrompt. (read the content of the file and add it to the prepared prompt)
+    - If the line starts with `#include`:
+      - the rest of the line is a relative path pointing to another file whose content should be included in the preparedPrompt. 
+      - you need to read the content of the file and add it to the prepared prompt
+      - the relative path is relative to the location of the file you currently process. Please make sure that the path is correctly modified.
     - If the line starts with `#write-to`, the rest of the line is a relative path including a file name that wee need later. Lets call it (outputFileName)
     - Any other line is just added to the preparedPrompt.
+  - Save the preparedPrompt to the related *.prompt.completed - file.
   - Send the prompt to chat-GPT4.
   - Write the result to a file with the same name but with an .output extension added.
   - When you have an outputFileName, then execute the post processing function, passing in the outputFileName and the full output of chatgpt.

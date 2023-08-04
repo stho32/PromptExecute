@@ -1,0 +1,15 @@
+#include ../base-rules.md
+#write-to configuration.py
+
+Please write me a configuration.py file that can do the following:
+
+- You write a module with helper functions for a bigger python program (let us call it main.py).
+- There is a config.json file in the directory where main.py is also located.
+- If the config.json file does not yet exist at application startup, the app will ask the user for a GPT-4 key. The config.json is then written including the GPT4-API-key and the application exits.
+- The json-value for the chatgpt key is named "gpt_4_key".
+- If the config.json file exists, the app will read the configuration into variables.
+
+Please write helper functions that will:
+- Initialize the config.json as given.
+- Add a function to retrieve the gpt-4 api key.
+
