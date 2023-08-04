@@ -4,6 +4,7 @@ import hashlib
 import argparse
 from pathlib import Path
 from library.chatgpt import call_gpt_4
+from library.interface_creator import extract_functions
 import re
 
 CONFIG_FILE = 'config.json'
@@ -21,9 +22,9 @@ def read_config():
             config = json.load(config_file)
         return config
 
-def md5(fname):
+def create_checksum(file_path):
     hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
+    with open(file_path, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
@@ -32,8 +33,8 @@ def process_file(file_path, openai_key):
     checksum_file = f'{file_path}.checksum'
     output_file = f'{file_path}.output'
     completed_file = f'{file_path}.completed'
-    file_checksum = md5(file_path)
-    
+    file_checksum = create_checksum(file_path)
+
     if os.path.exists(checksum_file):
         with open(checksum_file, 'r') as f:
             old_checksum = f.read().strip()
@@ -51,6 +52,7 @@ def process_file(file_path, openai_key):
 
     prepared_prompt = ''
     output_file_name = None
+    create_interface = False
 
     for line in lines:
         line = line.strip()
@@ -60,6 +62,8 @@ def process_file(file_path, openai_key):
                 prepared_prompt += f.read()
         elif line.startswith('#write-to'):
             output_file_name = os.path.join(os.path.dirname(file_path), line.split('#write-to ')[1])
+        elif line.startswith('#create-interface'):
+            create_interface = True
         else:
             prepared_prompt += line
 
@@ -72,13 +76,19 @@ def process_file(file_path, openai_key):
         f.write(result)
 
     if output_file_name:
-        post_process_output(result, output_file_name)
+        post_process_output(result, output_file_name, create_interface)
 
-def post_process_output(output, output_file_name):
+def post_process_output(output, output_file_name, create_interface):
     matches = re.findall('```python(.*?)```', output, re.DOTALL)
+    file_content = '\n'.join(matches)
+    
     with open(output_file_name, 'w') as f:
-        for match in matches:
-            f.write(match)
+        f.write(file_content)
+
+    if create_interface:
+        interface = extract_functions(file_content, output_file_name)
+        with open(f"{output_file_name}.interface", 'w') as f:
+            f.write(interface)
 
 def walk_dir(dir_path, openai_key):
     for root, dirs, files in os.walk(dir_path):

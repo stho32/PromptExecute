@@ -1,89 +1,20 @@
 Please write the code in the following way: 
 
-
-
 1. The source code must be capable of achieving the required technical result.
-
 2. The source code should use all available elements not relevant to the first goal, to adhere to the principles of clear communication, thereby preserving its connection to the business problem.
 
-
-
 The elements you may use to communicate the connection with the business problem are:
-
 - variable names
-
 - class names
-
 - method names
-
 - the general structure of the code (e.g. how you split it into separate functions)
-
 - comments
 
-
-
 The rules are:
-
 - Strings that you use multiple times should be constants.
-
 - Make sure that the elements are used unambiguous and remain connected to the business problem context.
-
 - The code should make sense.
-
 - The connection to the business problem should be convincing "at face value"?
-
 - No intermediate steps shoud be missing
 
-
-
-Please write the code in python.
-
-Please write me a main.py file that can do the following:
-
-## Configuration
-
-- There is a config.json file in the directory of the executable.
-- If the config.json file does not yet exist at application startup, the app will ask the user for a GPT-4 key. The config.json is then written including the GPT4-API-key and the application exits.
-- The json-value for the chatgpt key is named "gpt_4_key".
-- If the config.json file exists, the app will read the configuration into variables.
-
-## General functionality
-
-I will talk a lot about filenames in the following. I want to make an example to clarify the usage I mean:
-For a file with the name `main.prompt`, the other related files are named `main.prompt.completed`, `main.prompt.checksum` and `main.prompt.output`.
-
-- It should walk through a directory structure recursivly, looking for .prompt files.
-
-- Change detection:
-- Every time the app finds a .prompt-file it checks if a .prompt.checksum-file exists next to the file. E.g. a file something.prompt may have a something.prompt.checksum file next to it.
-- It will create a checksum e.g. in MD5 for the .prompt file.
-- It will compare the self-created checksum with the checksum that is contained in the .prompt.checksum file.
-- Do both differ (or does the .prompt.checksum file not exist) then process the file.
-- Update the .prompt.checksum to reflect the newly created checksum of its corresponding .prompt file.
-
-- For calling GPT 4 use the function `def call_gpt_4(openaikey, prompt)` from the library/chatgpt.py instead of writing it yourself.
-
-- How processing of a file is done:
-- The .prompt file is read into a list of strings.
-- Then go through all the lines in the file.
-- If the line starts with `#include`:
-- the rest of the line is a relative path pointing to another file whose content should be included in the preparedPrompt.
-- you need to read the content of the file and add it to the prepared prompt
-- the relative path is relative to the location of the file you currently process. Please make sure that the path is correctly modified.
-- If the line starts with `#write-to`, the rest of the line is a relative path including a file name that wee need later. Lets call it (outputFileName)
-- Any other line is just added to the preparedPrompt.
-- Save the preparedPrompt to the related *.prompt.completed - file.
-- Send the prompt to chat-GPT4.
-- Write the result to a file with the same name but with an .output extension added.
-- When you have an outputFileName, then execute the post processing function, passing in the outputFileName and the full output of chatgpt.
-
-- How the post-processing is done:
-- In the output there are lines that may start with ``` or ```python.
-- Collect all contents between the first ``` or ```python and the last ```.
-- write these contents into a file whose relative path and name are given as "outputFileName"
-
-- Please add loads of print-statements to the code so I can always see what the application is doing.
-
-- The script should have a command line parameter that represents the directory it needs to walk through.
-- If no command line parameter is given, the current working directory is the default.
-- Please note, that the configuration file (config.json) is always expected to be located next to the main.py and that this directory may not be the same as the current working directory.
+Please write the code in python.Please write me a main.py file that can do the following:## Configuration- There is a config.json file in the directory of the executable.- If the config.json file does not yet exist at application startup, the app will ask the user for a GPT-4 key. The config.json is then written including the GPT4-API-key and the application exits.- The json-value for the chatgpt key is named "gpt_4_key".- If the config.json file exists, the app will read the configuration into variables.## General functionalityI will talk a lot about filenames in the following. I want to make an example to clarify the usage I mean:For a file with the name `main.prompt`, the other related files are named `main.prompt.completed`, `main.prompt.checksum` and `main.prompt.output`.- It should walk through a directory structure recursivly, looking for .prompt files.- Change detection:- Every time the app finds a .prompt-file it checks if a .prompt.checksum-file exists next to the file. E.g. a file something.prompt may have a something.prompt.checksum file next to it.- It will create a checksum e.g. in MD5 for the .prompt file.- It will compare the self-created checksum with the checksum that is contained in the .prompt.checksum file.- Do both differ (or does the .prompt.checksum file not exist) then process the file.- Update the .prompt.checksum to reflect the newly created checksum of its corresponding .prompt file.- For calling GPT 4 use the function `def call_gpt_4(openaikey, prompt)` from the library/chatgpt.py instead of writing it yourself.- How processing of a file is done:- The .prompt file is read into a list of strings.- Then go through all the lines in the file.- If the line starts with `#include`:- the rest of the line is a relative path pointing to another file whose content should be included in the preparedPrompt.- you need to read the content of the file and add it to the prepared prompt- the relative path is relative to the location of the file you currently process. Please make sure that the path is correctly modified.- If the line starts with `#write-to`, the rest of the line is a relative path including a file name that wee need later. Lets call it (outputFileName)- If the line starts with `#create-interface`, then remember that you should create an interface later.- Any other line is just added to the preparedPrompt.- Save the preparedPrompt to the related *.prompt.completed - file.- Send the prompt to chat-GPT4.- Write the result to a file with the same name but with an .output extension added.- When you have an outputFileName, then execute the post processing function, passing in the outputFileName and the full output of chatgpt.- How the post-processing is done:- In the output there are lines that may start with ``` or ```python.- Collect all contents between the first ``` or ```python and the last ```.- write these contents into a file whose relative path and name are given as "outputFileName"- in case you should create an interface file, use `def extract_functions(file_content, file_name)` from "library.interface_creator.py" and write the resulting string to a file called "outputFilename.interface" .- Please add loads of print-statements to the code so I can always see what the application is doing.- The script should have a command line parameter that represents the directory it needs to walk through.- If no command line parameter is given, the current working directory is the default.- Please note, that the configuration file (config.json) is always expected to be located next to the main.py and that this directory may not be the same as the current working directory.

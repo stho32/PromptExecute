@@ -1,0 +1,19 @@
+#include ../base-rules.md
+#write-to interface_creator.py
+#create-interface
+
+Please write a function that will receive 
+- the contents of a python file
+- the filename of the python file
+
+It will then look for every function it finds and add its interface to an output string.
+
+In the end, the content for that string should look like:
+
+```
+./library/file.py contains the following elements:
+
+def FirstFunction(parameter1, parameter2)
+def SecondFunction(parameter4, someString, whatever)
+def ThirdFunction()
+```
