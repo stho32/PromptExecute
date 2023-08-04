@@ -12,11 +12,12 @@ The elements you may use to communicate the connection with the business problem
 - comments
 
 The rules are:
+- Strings that you use multiple times should be constants.
 - Make sure that the elements are used unambiguous and remain connected to the business problem context.
-- Does the code make sense? ("Can you comprehend what is being said?")
-- Is the connection to the business problem convincing "at face value"?
-- Are no intermediate steps missing?
-  
+- The code should make sense.
+- The connection to the business problem should be convincing "at face value"?
+- No intermediate steps shoud be missing
+
 Please write the code in python.
 ```
 
@@ -26,6 +27,7 @@ Please write me a main.py file that can do the following:
 
 - There is a config.json file in the directory of the executable.
 - If the config.json file does not yet exist at application startup, the app will ask the user for a GPT-4 key. The config.json is then written including the GPT4-API-key and the application exits.
+- The json-value for the chatgpt key is named "gpt_4_key".
 - If the config.json file exists, the app will read the configuration into variables.
 
 ## General functionality
@@ -45,9 +47,16 @@ Please write me a main.py file that can do the following:
   - The .prompt file is read into a list of strings.
   - Then go through all the lines in the file.
     - If the line starts with `#include`, the rest of the line is a relative path pointing to another file whose content should be included in the preparedPrompt. (read the content of the file and add it to the prepared prompt)
+    - If the line starts with `#write-to`, the rest of the line is a relative path including a file name that wee need later. Lets call it (outputFileName)
     - Any other line is just added to the preparedPrompt.
   - Send the prompt to chat-GPT4.
   - Write the result to a file with the same name but with an .output extension added.
+  - When you have an outputFileName, then execute the post processing function, passing in the outputFileName and the full output of chatgpt.
+
+- How the post-processing is done:
+  - In the output there are lines that start with ```.
+  - Collect all contents between the first ``` and the last ```.
+  - write these contents into a file whose relative path and name are given as "outputFileName"
 
 - Please add loads of print-statements to the code so I can always see what the application is doing.
 

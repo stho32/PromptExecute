@@ -13,7 +13,7 @@ def get_config():
         gpt4_key = input("Please enter your GPT-4 API key: ")
         # Write the key to the config file
         with open(CONFIG_FILE, 'w') as config_file:
-            json.dump({"GPT4-API-key": gpt4_key}, config_file)
+            json.dump({"gpt_4_key": gpt4_key}, config_file)
         print(f"GPT-4 key saved in {CONFIG_FILE}. Please rerun the application.")
         sys.exit(0)
     
@@ -73,7 +73,7 @@ def walk_directory(directory, openaikey):
 
 def main():
     config = get_config()
-    openaikey = config["GPT4-API-key"]
+    openaikey = config["gpt_4_key"]
 
     # Get directory from command line argument or use current directory
     directory = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
