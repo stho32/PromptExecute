@@ -39,7 +39,7 @@ Please write me a main.py file that can do the following:
   - Do both differ (or does the .prompt.checksum file not exist) then process the file.
   - Update the .prompt.checksum to reflect the newly created checksum of its corresponding .prompt file.
 
-- Prepare a function that can send a prompt to the ChatGPT-4 API using the api-key.
+- For calling GPT 4 use the function `def call_gpt_4(openaikey, prompt)` from the library/chatgpt.py instead of writing it yourself.
 
 - How processing of a file is done:
   - The .prompt file is read into a list of strings.
@@ -49,3 +49,8 @@ Please write me a main.py file that can do the following:
   - Send the prompt to chat-GPT4.
   - Write the result to a file with the same name but with an .output extension added.
 
+- Please add loads of print-statements to the code so I can always see what the application is doing.
+
+- The script should have a command line parameter that represents the directory it needs to walk through.
+- If no command line parameter is given, the current working directory is the default.
+- Please note, that the configuration file (config.json) is always expected to be located next to the main.py and that this directory may not be the same as the current working directory.
