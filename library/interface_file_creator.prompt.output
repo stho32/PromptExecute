@@ -1,37 +1,36 @@
-Here's a Python script that uses the `ast` (Abstract Syntax Trees) module to parse a Python file and extract the function names and their parameters. The script follows the rules and guidelines you provided.
+Here's how you can achieve this by using the `ast` (Abstract Syntax Tree) module in Python:
 
 ```python
 import ast
 
-# Constants for repeated strings
-FILE_CONTAINS_MSG = " contains the following elements:\n"
-DEF_MSG = "def "
+# Constants for the output string format
+FILE_MSG = "{} contains the following elements:\n"
+FUNC_MSG = "def {}({})\n"
 
-def extract_functions(file_content, file_name):
-    """
-    This function takes the content of a python file and its filename as input.
-    It parses the file, extracts the function names and their parameters, and 
-    returns a string that lists the functions and their parameters.
-    """
-    # Parse the content of the file into an AST
-    module = ast.parse(file_content)
+def extract_function_interfaces(python_file_content, python_file_name):
+    # Parse the python file content into an abstract syntax tree
+    ast_tree = ast.parse(python_file_content)
 
     # Initialize the output string with the filename
-    output_string = './' + file_name + FILE_CONTAINS_MSG
+    output_string = FILE_MSG.format(python_file_name)
 
-    # Traverse the AST
-    for node in ast.walk(module):
-        # If the node is a function
+    # Iterate over all top-level functions in the abstract syntax tree
+    for node in ast.iter_child_nodes(ast_tree):
         if isinstance(node, ast.FunctionDef):
-            # Get the function name
-            function_name = node.name
+            # Extract the function name
+            func_name = node.name
 
-            # Get the function parameters
-            function_params = [arg.arg for arg in node.args.args]
+            # Extract the function parameters
+            func_params = [arg.arg for arg in node.args.args]
 
             # Add the function interface to the output string
-            output_string += DEF_MSG + function_name + '(' + ', '.join(function_params) + ')\n'
+            output_string += FUNC_MSG.format(func_name, ', '.join(func_params))
 
     return output_string
 ```
-This script is designed to be clear and unambiguous. The function `extract_functions` does exactly what its name suggests: it extracts the functions from a Python file. The code is split into separate parts for parsing the file, traversing the AST, and building the output string. Constant strings are used for repeated parts of the output string. The variable and function names are chosen to clearly communicate their purpose. The comments explain the purpose of each part of the code.
+
+This function `extract_function_interfaces` takes the contents of a Python file and its filename as inputs. It uses the `ast` module to parse the Python file content into an abstract syntax tree. It then iterates over all top-level functions in the tree, extracts their names and parameters, and adds their interfaces to the output string. The output string is formatted according to the provided example.
+
+Please note that this function only extracts top-level functions, not functions nested within other functions or methods within classes. If you need to extract those as well, you would need to modify the function to recursively traverse the abstract syntax tree.
+
+This function also assumes that the Python file content is a string. If you have the file path instead, you can read the file into a string using the `open` function.

@@ -1,33 +1,27 @@
 
 import ast
 
-# Constants for repeated strings
-FILE_CONTAINS_MSG = " contains the following elements:\n"
-DEF_MSG = "def "
+# Constants for the output string format
+FILE_MSG = "{} contains the following elements:\n"
+FUNC_MSG = "def {}({})\n"
 
-def extract_functions(file_content, file_name):
-    """
-    This function takes the content of a python file and its filename as input.
-    It parses the file, extracts the function names and their parameters, and 
-    returns a string that lists the functions and their parameters.
-    """
-    # Parse the content of the file into an AST
-    module = ast.parse(file_content)
+def extract_function_interfaces(python_file_content, python_file_name):
+    # Parse the python file content into an abstract syntax tree
+    ast_tree = ast.parse(python_file_content)
 
     # Initialize the output string with the filename
-    output_string = './' + file_name + FILE_CONTAINS_MSG
+    output_string = FILE_MSG.format(python_file_name)
 
-    # Traverse the AST
-    for node in ast.walk(module):
-        # If the node is a function
+    # Iterate over all top-level functions in the abstract syntax tree
+    for node in ast.iter_child_nodes(ast_tree):
         if isinstance(node, ast.FunctionDef):
-            # Get the function name
-            function_name = node.name
+            # Extract the function name
+            func_name = node.name
 
-            # Get the function parameters
-            function_params = [arg.arg for arg in node.args.args]
+            # Extract the function parameters
+            func_params = [arg.arg for arg in node.args.args]
 
             # Add the function interface to the output string
-            output_string += DEF_MSG + function_name + '(' + ', '.join(function_params) + ')\n'
+            output_string += FUNC_MSG.format(func_name, ', '.join(func_params))
 
     return output_string
