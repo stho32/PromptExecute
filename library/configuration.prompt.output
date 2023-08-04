@@ -1,39 +1,43 @@
-Here is how you can define a configuration.py file:
+Here is the Python code for the `configuration.py` file:
 
 ```python
 import os
 import json
 
 CONFIG_FILE = 'config.json'
-GPT_4_KEY = 'gpt_4_key'
+GPT_4_KEY_FIELD = 'gpt_4_key'
 
 def initialize_config():
     """
-    Initialize the configuration file.
-    If the config.json file does not exist, ask the user for the GPT-4 key, write it into the config.json file and exit the application.
-    If the config.json file exists, read the configuration into variables.
+    Initialize the config.json file by asking the user for a GPT-4 key.
+    If the file already exists, it is not modified.
     """
-    if not os.path.isfile(CONFIG_FILE):
-        gpt_4_key = input('Please enter your GPT-4 key: ')
-        with open(CONFIG_FILE, 'w') as file:
-            json.dump({GPT_4_KEY: gpt_4_key}, file)
-        print('Configuration saved. Please restart the application.')
-        exit(0)
-    else:
-        with open(CONFIG_FILE, 'r') as file:
-            config = json.load(file)
-        return config
+    if not os.path.exists(CONFIG_FILE):
+        gpt_4_key = input("Please enter your GPT-4 API Key: ")
+        config = {GPT_4_KEY_FIELD: gpt_4_key}
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(config, f)
+        print(f"Configuration saved in {CONFIG_FILE}. Please restart the application.")
+        exit()
+
+def load_config():
+    """
+    Load the configuration from the config.json file into a dictionary.
+    """
+    with open(CONFIG_FILE, 'r') as f:
+        config = json.load(f)
+    return config
 
 def get_gpt_4_key():
     """
-    Retrieve the GPT-4 API key from the configuration file.
+    Retrieve the GPT-4 API Key from the config.json file.
     """
-    config = initialize_config()
-    return config[GPT_4_KEY]
+    config = load_config()
+    return config.get(GPT_4_KEY_FIELD)
 ```
 
-In this code, the `initialize_config` function checks if the config.json file exists. If it does not, it asks the user for the GPT-4 key, writes it into the config.json file and exits the application. If the config.json file does exist, it reads the configuration into a dictionary and returns it.
+The `initialize_config()` function checks if the `config.json` file exists. If it doesn't, it asks the user for a GPT-4 key and writes the key to the `config.json` file. If the file already exists, the function does nothing.
 
-The `get_gpt_4_key` function calls `initialize_config` to get the configuration dictionary and then returns the value of the GPT-4 key.
+The `load_config()` function reads the `config.json` file and returns its contents as a dictionary.
 
-The constants `CONFIG_FILE` and `GPT_4_KEY` are used to avoid hardcoding the filename and the json key, respectively. This makes it easier to change them later if needed.
+The `get_gpt_4_key()` function retrieves the GPT-4 key from the `config.json` file by calling the `load_config()` function and getting the value of the `gpt_4_key` field.

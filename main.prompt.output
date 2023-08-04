@@ -1,98 +1,111 @@
-Here is a Python script that should meet your requirements:
+Sure, here is a Python script that fulfills your requirements:
 
 ```python
 import os
 import sys
 import json
 import hashlib
+from pathlib import Path
 from library.chatgpt import call_gpt_4
 
 CONFIG_FILE = 'config.json'
-GPT_KEY = 'gpt_4_key'
+GPT_4_KEY = 'gpt_4_key'
 PROMPT_EXT = '.prompt'
-CHECKSUM_EXT = '.checksum'
-COMPLETED_EXT = '.completed'
-OUTPUT_EXT = '.output'
+CHECKSUM_EXT = '.prompt.checksum'
+COMPLETED_EXT = '.prompt.completed'
+OUTPUT_EXT = '.prompt.output'
+
 
 def get_config():
-    if not os.path.exists(CONFIG_FILE):
-        gpt_key = input("Please enter your GPT-4 key: ")
+    if not Path(CONFIG_FILE).exists():
+        gpt_4_key = input("Please enter your GPT-4 key: ")
         with open(CONFIG_FILE, 'w') as f:
-            json.dump({GPT_KEY: gpt_key}, f)
-        print(f"Configuration saved in {CONFIG_FILE}. Please restart the application.")
+            json.dump({GPT_4_KEY: gpt_4_key}, f)
+        print(f"Saved GPT-4 key in {CONFIG_FILE}. Please restart the application.")
         sys.exit(0)
 
     with open(CONFIG_FILE, 'r') as f:
-        return json.load(f)
+        config = json.load(f)
+    return config
 
-def compute_checksum(file_path):
-    hasher = hashlib.md5()
-    with open(file_path, 'rb') as f:
-        buf = f.read()
-        hasher.update(buf)
-    return hasher.hexdigest()
 
-def process_file(file_path, openaikey):
-    print(f"Processing file: {file_path}")
+def process_file(file_path, gpt_4_key):
+    print(f"Processing file {file_path}...")
     checksum_file = file_path + CHECKSUM_EXT
     completed_file = file_path + COMPLETED_EXT
-    old_checksum = ''
-    if os.path.exists(checksum_file):
+    output_file = file_path + OUTPUT_EXT
+
+    # Calculate checksum
+    with open(file_path, 'rb') as f:
+        data = f.read()
+        checksum = hashlib.md5(data).hexdigest()
+
+    # Compare checksum
+    if Path(checksum_file).exists():
         with open(checksum_file, 'r') as f:
             old_checksum = f.read().strip()
+        if old_checksum == checksum:
+            print(f"No changes detected in {file_path}. Skipping...")
+            return
 
-    new_checksum = compute_checksum(file_path)
-    if old_checksum != new_checksum:
-        with open(checksum_file, 'w') as f:
-            f.write(new_checksum)
+    # Update checksum
+    with open(checksum_file, 'w') as f:
+        f.write(checksum)
 
-        preparedPrompt, outputFileName = prepare_prompt(file_path)
-        with open(completed_file, 'w') as f:
-            f.write('\n'.join(preparedPrompt))
+    # Process prompt file
+    prepared_prompt = []
+    output_file_name = None
+    with open(file_path, 'r') as f:
+        for line in f:
+            if line.startswith("#include"):
+                include_file = os.path.join(os.path.dirname(file_path), line.split("#include")[1].strip())
+                with open(include_file, 'r') as inc_f:
+                    prepared_prompt.append(inc_f.read())
+            elif line.startswith("#write-to"):
+                output_file_name = os.path.join(os.path.dirname(file_path), line.split("#write-to")[1].strip())
+            else:
+                prepared_prompt.append(line)
 
-        output = call_gpt_4(openaikey, '\n'.join(preparedPrompt))
-        with open(file_path + OUTPUT_EXT, 'w') as f:
+    # Save prepared prompt
+    with open(completed_file, 'w') as f:
+        f.write('\n'.join(prepared_prompt))
+
+    # Call GPT-4
+    response = call_gpt_4(gpt_4_key, '\n'.join(prepared_prompt))
+
+    # Save output
+    with open(output_file, 'w') as f:
+        f.write(response)
+
+    # Post-process output
+    if output_file_name:
+        with open(output_file, 'r') as f:
+            output = f.read()
+        start = output.find('```python')
+        if start == -1:
+            start = output.find('```')
+        end = output.rfind('```')
+        if start != -1 and end != -1:
+            output = output[start:end]
+        with open(output_file_name, 'w') as f:
             f.write(output)
 
-        if outputFileName:
-            post_process(output, outputFileName)
-
-def prepare_prompt(file_path):
-    preparedPrompt = []
-    outputFileName = None
-    with open(file_path, 'r') as f:
-        for line in f.readlines():
-            if line.startswith('#include'):
-                include_file = os.path.join(os.path.dirname(file_path), line.split('#include')[1].strip())
-                with open(include_file, 'r') as inc_f:
-                    preparedPrompt.extend(inc_f.readlines())
-            elif line.startswith('#write-to'):
-                outputFileName = os.path.join(os.path.dirname(file_path), line.split('#write-to')[1].strip())
-            else:
-                preparedPrompt.append(line.strip())
-    return preparedPrompt, outputFileName
-
-def post_process(output, outputFileName):
-    print(f"Post-processing output to: {outputFileName}")
-    content = output.split('```')[1]
-    with open(outputFileName, 'w') as f:
-        f.write(content)
 
 def main():
     config = get_config()
-    openaikey = config.get(GPT_KEY, '')
-    if not openaikey:
-        print(f"No {GPT_KEY} found in {CONFIG_FILE}. Please add it and restart the application.")
-        sys.exit(0)
+    gpt_4_key = config[GPT_4_KEY]
 
-    directory = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith(PROMPT_EXT):
-                process_file(os.path.join(root, file), openaikey)
+    dir_to_walk = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
+
+    print(f"Starting to walk through directory {dir_to_walk}...")
+    for dir_path, _, file_names in os.walk(dir_to_walk):
+        for file_name in file_names:
+            if file_name.endswith(PROMPT_EXT):
+                process_file(os.path.join(dir_path, file_name), gpt_4_key)
+
 
 if __name__ == "__main__":
     main()
 ```
 
-This script includes the functionality you described. It recursively searches for .prompt files in the specified directory (or the current directory if none is specified), computes the checksum for each .prompt file and compares it with the existing .checksum file. If the checksums differ, the script processes the .prompt file, prepares the prompt, calls GPT-4, and writes the output to the .output file. It also includes a post-processing function that extracts the content between code blocks and writes it to a specified output file.
+This script first checks for the existence of a `config.json` file and asks for a GPT-4 key if it doesn't exist. Then it walks through the directory structure recursively, looking for `.prompt` files. For each `.prompt` file, it calculates the MD5 checksum and compares it with the existing checksum from the `.prompt.checksum` file (if it exists). If the checksums differ or the checksum file doesn't exist, it processes the `.prompt` file according to the specified rules.
