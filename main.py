@@ -1,85 +1,91 @@
 import os
-import sys
 import hashlib
 import json
+import argparse
 from library.chatgpt import call_gpt_4
 
 CONFIG_FILE = "config.json"
+PROMPT_EXTENSION = ".prompt"
+CHECKSUM_EXTENSION = ".prompt.checksum"
+OUTPUT_EXTENSION = ".output"
+INCLUDE_PREFIX = "#include"
+WRITE_TO_PREFIX = "#write-to"
+CODE_BLOCK = "```"
 
-def get_config():
-    # Check if config file exists
-    if not os.path.isfile(CONFIG_FILE):
-        # Ask user for GPT-4 key
-        gpt4_key = input("Please enter your GPT-4 API key: ")
-        # Write the key to the config file
-        with open(CONFIG_FILE, 'w') as config_file:
-            json.dump({"gpt_4_key": gpt4_key}, config_file)
-        print(f"GPT-4 key saved in {CONFIG_FILE}. Please rerun the application.")
-        sys.exit(0)
-    
-    # Read config file
-    with open(CONFIG_FILE, 'r') as config_file:
-        config = json.load(config_file)
-    return config
+def create_checksum(file_path):
+    hasher = hashlib.md5()
+    with open(file_path, 'rb') as file:
+        buf = file.read()
+        hasher.update(buf)
+    return hasher.hexdigest()
 
-def process_file(filepath, openaikey):
-    # Check if checksum file exists
-    checksum_file = filepath + ".checksum"
-    new_checksum = hashlib.md5(open(filepath, 'rb').read()).hexdigest()
+def write_checksum(file_path, checksum):
+    with open(file_path + CHECKSUM_EXTENSION, 'w') as file:
+        file.write(checksum)
 
-    if os.path.isfile(checksum_file):
-        with open(checksum_file, 'r') as f:
-            old_checksum = f.read().strip()
-        if old_checksum == new_checksum:
-            print(f"No changes detected in {filepath}. Skipping...")
+def read_config():
+    if not os.path.exists(CONFIG_FILE):
+        gpt_4_key = input("Please enter your GPT-4 key: ")
+        with open(CONFIG_FILE, 'w') as file:
+            json.dump({"gpt_4_key": gpt_4_key}, file)
+        print(f"Configuration file {CONFIG_FILE} has been created.")
+        exit(0)
+    else:
+        with open(CONFIG_FILE, 'r') as file:
+            config = json.load(file)
+        return config["gpt_4_key"]
+
+def process_prompt_file(file_path, gpt_4_key):
+    print(f"Processing {file_path}...")
+
+    checksum = create_checksum(file_path)
+    if os.path.exists(file_path + CHECKSUM_EXTENSION):
+        with open(file_path + CHECKSUM_EXTENSION, 'r') as file:
+            old_checksum = file.read()
+        if old_checksum == checksum:
+            print(f"No changes detected in {file_path}. Skipping...")
             return
-    print(f"Processing {filepath}...")
-    
-    # Prepare prompt
-    preparedPrompt = []
-    with open(filepath, 'r') as f:
-        for line in f:
-            if line.startswith("#include"):
-                include_file = line.split("#include", 1)[1].strip()
-                if os.path.isfile(include_file):
-                    with open(include_file, 'r') as inc_f:
-                        preparedPrompt.append(inc_f.read())
-                else:
-                    print(f"Warning: Included file {include_file} not found.")
-            else:
-                preparedPrompt.append(line)
-    preparedPrompt = "\n".join(preparedPrompt)
-    
-    # Call GPT-4
-    result = call_gpt_4(openaikey, preparedPrompt)
-    
-    # Write result to output file
-    output_file = filepath + ".output"
-    with open(output_file, 'w') as f:
-        f.write(result)
-    print(f"Output written to {output_file}.")
-    
-    # Update checksum
-    with open(checksum_file, 'w') as f:
-        f.write(new_checksum)
-    print(f"Updated checksum in {checksum_file}.")
+    write_checksum(file_path, checksum)
 
-def walk_directory(directory, openaikey):
+    prepared_prompt = []
+    output_file_name = None
+    with open(file_path, 'r') as file:
+        for line in file:
+            if line.startswith(INCLUDE_PREFIX):
+                include_file = line[len(INCLUDE_PREFIX):].strip()
+                with open(include_file, 'r') as inc_file:
+                    prepared_prompt.append(inc_file.read())
+            elif line.startswith(WRITE_TO_PREFIX):
+                output_file_name = line[len(WRITE_TO_PREFIX):].strip()
+            else:
+                prepared_prompt.append(line)
+
+    response = call_gpt_4(gpt_4_key, ''.join(prepared_prompt))
+    with open(file_path + OUTPUT_EXTENSION, 'w') as file:
+        file.write(response)
+
+    if output_file_name:
+        post_process_output(response, output_file_name)
+
+def post_process_output(output, output_file_name):
+    print(f"Post processing output to {output_file_name}...")
+    code_block_contents = output[output.find(CODE_BLOCK)+len(CODE_BLOCK):output.rfind(CODE_BLOCK)]
+    with open(output_file_name, 'w') as file:
+        file.write(code_block_contents)
+
+def walk_directory(directory, gpt_4_key):
     for root, dirs, files in os.walk(directory):
         for file in files:
-            if file.endswith(".prompt"):
-                filepath = os.path.join(root, file)
-                process_file(filepath, openaikey)
+            if file.endswith(PROMPT_EXTENSION):
+                process_prompt_file(os.path.join(root, file), gpt_4_key)
 
 def main():
-    config = get_config()
-    openaikey = config["gpt_4_key"]
+    parser = argparse.ArgumentParser(description='Walks through a directory structure looking for .prompt files.')
+    parser.add_argument('directory', nargs='?', default=os.getcwd())
+    args = parser.parse_args()
 
-    # Get directory from command line argument or use current directory
-    directory = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
-    print(f"Scanning directory: {directory}")
-
-    walk_directory(directory, openaikey)
+    gpt_4_key = read_config()
+    walk_directory(args.directory, gpt_4_key)
 
 if __name__ == "__main__":
     main()
