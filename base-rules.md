@@ -16,5 +16,6 @@ The rules are:
 - The code should make sense.
 - The connection to the business problem should be convincing "at face value"?
 - No intermediate steps shoud be missing
-
-Please write the code in python.
+- Please write the code in python.
+- Please do not add examples
+- Add doc-strings to all functions that explain what the function does.

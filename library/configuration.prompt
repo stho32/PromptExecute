@@ -14,3 +14,14 @@ Please write helper functions that will:
 - Initialize the config.json as given.
 - Add a function to retrieve the gpt-4 api key.
 
+Please write the following functions:
+```
+### `initialize_config()`
+The `initialize_config()` method checks if a configuration file already exists. If not, it prompts the user to enter a GPT-4 key and saves this key in a new configuration file. If the file already exists, no action is taken.
+
+### `load_config()`
+The `load_config()` method reads the configuration file and returns its content as a dictionary.
+
+### `get_gpt4_key()`
+The `get_gpt4_key()` method retrieves the GPT-4 key from the configuration file. It uses the `load_config()` method to read the file and returns the key as a string.
+```

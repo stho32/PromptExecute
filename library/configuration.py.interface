@@ -1,4 +1,9 @@
-./.\library\configuration.py contains the following elements:
-def initialize_config()
-def load_config()
-def get_gpt4_key()
+### `initialize_config()`
+Die Methode `initialize_config()` überprüft, ob eine Konfigurationsdatei bereits existiert. Falls nicht, fordert sie den Benutzer auf, einen GPT-4 Schlüssel einzugeben und speichert diesen Schlüssel dann in einer neuen Konfigurationsdatei. Wenn die Datei bereits existiert, wird keine Aktion durchgeführt.
+
+### `load_config()`
+Die Methode `load_config()` liest die Konfigurationsdatei und gibt deren Inhalt als Dictionary zurück. 
+
+### `get_gpt4_key()`
+Die Methode `get_gpt4_key()` ruft den GPT-4 Schlüssel aus der Konfigurationsdatei ab. Sie nutzt die `load_config()`-Methode, um die Datei zu lesen und gibt den Schlüssel als String zurück.
+

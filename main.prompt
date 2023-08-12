@@ -6,10 +6,6 @@ For configuration access use ./library/configuration.py with the interface:
 #include .\library\configuration.py.interface
 ```
 
-As interface creator use ./library/interface_creator.py with the interface:
-```
-#include .\library\interface_creator.py.interface
-```
 - For calling GPT 4 use the function `def call_gpt_4(openaikey, prompt)` from the library/chatgpt.py instead of writing it yourself.
 
 
@@ -37,7 +33,6 @@ For a file with the name `main.prompt`, the other related files are named `main.
       - you need to read the content of the file and add it to the prepared prompt
       - the relative path is relative to the location of the file you currently process. Please make sure that the path is correctly modified.
     - If the line starts with `#write-to`, the rest of the line is a relative path including a file name that wee need later. Lets call it (outputFileName)
-    - If the line starts with `#create-interface`, then remember that you should create an interface later.
     - Any other line is just added to the preparedPrompt. But please do not forget the line feeds as it should be a properly formatted text block.
   - Save the preparedPrompt to the related *.prompt.completed - file.
   - Send the prompt to chat-GPT4.
@@ -48,7 +43,6 @@ For a file with the name `main.prompt`, the other related files are named `main.
   - In the output there are lines that may start with ``` or ```python.
   - Collect all contents between the first ``` or ```python and the last ```.
   - write these contents into a file whose relative path and name are given as "outputFileName"
-  - in case you should create an interface file, use the function from "library.interface_creator.py" and write the resulting string to a file called "outputFilename.interface" .
 
 - Please add loads of print-statements to the code so I can always see what the application is doing.
 
