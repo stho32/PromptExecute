@@ -1,2 +1,0 @@
-./.\library\interface_creator.py contains the following elements:
-def extract_function_interfaces(python_file_content, python_file_name)

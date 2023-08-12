@@ -1,0 +1,26 @@
+#include ../base-rules.md
+#write-to change_detection.py
+
+```python
+def detect_changes(filepath, checksums_filepath):
+    pass
+
+def set_unchanged(filepath, checksums_filepath):
+    pass
+```
+
+For both functions:
+- filepath is the relative path to the file that shall be checked for changes
+- checksums_filepath is a csv file that contains relative paths and checksums for all files in the project.
+- If the file at checksums_filepath does not exist yet, please create it.
+
+`def detect_changes(filepath, checksums_filepath)`:
+- The function shall create an md5 checksum about the content and compare it to the one in the checksums-file.
+- If the checksum is different from the one that is saved or none is saved, then return true otherwise return false.
+
+`def set_unchanged(filepath, checksums_filepath)`:
+- The function also creates an md5 checksum for the content of the "file".
+- It reads the checksums-file.
+- In case there is already a checksum for "file", it will remove that.
+- It will then add the checksum and the path for "file" in a way that can be utilized by detect changes.
+

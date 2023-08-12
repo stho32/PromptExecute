@@ -6,6 +6,11 @@ For configuration access use ./library/configuration.py with the interface:
 #include .\library\configuration.py.interface
 ```
 
+For change-detection use ./library/change_detection.py with the interface:
+```
+#include .\library\change_detection.py.interface
+```
+
 - For calling GPT 4 use the function `def call_gpt_4(openaikey, prompt)` from the library/chatgpt.py instead of writing it yourself.
 
 
@@ -16,14 +21,8 @@ Please write me a main.py file that can do the following:
 I will talk a lot about filenames in the following. I want to make an example to clarify the usage I mean:
 For a file with the name `main.prompt`, the other related files are named `main.prompt.completed`, `main.prompt.checksum` and `main.prompt.output`.
 
-- The app should walk through a directory structure recursivly, looking for .prompt files.
-
-- Change detection:
-  - Every time the app finds a .prompt-file it checks if a .prompt.checksum-file exists next to the file. E.g. a file something.prompt may have a something.prompt.checksum file next to it.
-  - It will create a checksum e.g. in MD5 for the .prompt file.
-  - It will compare the self-created checksum with the checksum that is contained in the .prompt.checksum file.
-  - Do both differ (or does the .prompt.checksum file not exist) then process the file.
-  - Update the .prompt.checksum to reflect the newly created checksum of its corresponding .prompt file.
+- The app is called with a command line parameter. The parameter is the path to the main prompt file that will need processing. 
+Example e.g.: python main.py ./main.prompt
 
 - How processing of a file is done:
   - The .prompt file is read into a list of strings.

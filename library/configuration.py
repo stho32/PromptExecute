@@ -11,9 +11,8 @@ def initialize_config():
     """
     if not os.path.exists(CONFIG_FILE):
         gpt4_key = input("Please enter your GPT-4 key: ")
-        config = {GPT4_KEY: gpt4_key}
-        with open(CONFIG_FILE, 'w') as f:
-            json.dump(config, f)
+        with open(CONFIG_FILE, 'w') as config_file:
+            json.dump({GPT4_KEY: gpt4_key}, config_file)
         print(f"Configuration saved in {CONFIG_FILE}. Please restart the application.")
         exit()
 
@@ -21,8 +20,8 @@ def load_config():
     """
     Reads the configuration file and returns its content as a dictionary.
     """
-    with open(CONFIG_FILE, 'r') as f:
-        config = json.load(f)
+    with open(CONFIG_FILE, 'r') as config_file:
+        config = json.load(config_file)
     return config
 
 def get_gpt4_key():

@@ -1,10 +1,8 @@
 @echo off
 setlocal
 
-REM Detect current working path
-set CurrDir=%cd%
+set FileName=%1
 
-REM Execute the python script
-python.exe C:\Projekte\PromptExecute\main.py %CurrDir%
+python.exe C:\Projekte\PromptExecute\main.py %FileName%
 
 endlocal

@@ -1,0 +1,5 @@
+Detect if a file has changed by comparing its md5 checksum with a previously stored checksum.:
+def detect_changes(file_path, checksums_file_path)
+
+Set a file as unchanged by storing its md5 checksum.:
+def set_unchanged(file_path, checksums_file_path)
